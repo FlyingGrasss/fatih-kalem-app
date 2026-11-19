@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fatih Kalem</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="is-drawing">
+  <header id="toolStrip" class="tool-strip">
+    <div id="toolbar" class="toolbar" role="toolbar" aria-label="Çizim araçları" aria-orientation="horizontal" data-dock="left" data-collapsed="false">
+      <button type="button" id="toolbarGrip" class="toolbar-grip" title="Sürükleyerek taşı" aria-label="Araç çubuğunu taşı">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <circle cx="8" cy="7" r="1.2"></circle>
+          <circle cx="16" cy="7" r="1.2"></circle>
+          <circle cx="8" cy="12" r="1.2"></circle>
+          <circle cx="16" cy="12" r="1.2"></circle>
+          <circle cx="8" cy="17" r="1.2"></circle>
+          <circle cx="16" cy="17" r="1.2"></circle>
+        </svg>
+      </button>
+
+      <div id="modeStatus" class="mode-status" data-on="true" role="status" aria-live="polite" title="Çizim modu açık · Ctrl+Alt+K ile tıklamayı geçir">
+        <span id="modeDot" class="mode-dot" aria-hidden="true"></span>
+        <span id="modeText">Çizim</span>
+      </div>
+
+      <div id="toolbarMain" class="toolbar-main">
+        <div class="tool-group" role="group" aria-label="Çizim araçları">
+          <button type="button" class="tool-btn" data-tool="pen" aria-pressed="true" title="Kalem (P)">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 19l1.4-4.7L16.8 3.9a2.1 2.1 0 0 1 3 0l.3.3a2.1 2.1 0 0 1 0 3L9.7 17.6 5 19Z"></path>
+              <path d="M14.5 6.2l3.3 3.3"></path>
+            </svg>
+            <span>Kalem</span>
+          </button>
+
+          <button type="button" class="tool-btn" data-tool="highlighter" aria-pressed="false" title="Fosforlu kalem (H)">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M14.6 4.2l5.2 5.2-8.2 8.2H6.4v-5.2l8.2-8.2Z"></path>
+              <path d="M12.8 6l5.2 5.2"></path>
+              <path d="M4 20h8"></path>
+            </svg>
+            <span>Fosforlu</span>
+          </button>
+
+          <button type="button" class="tool-btn" data-tool="eraser" aria-pressed="false" title="Silgi (E)">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 16.8l7.6-7.6a2 2 0 0 1 2.8 0l2.6 2.6a2 2 0 0 1 0 2.8L12.6 19H8l-4-4Z"></path>
+              <path d="M9.4 11.4l5.6 5.6"></path>
+              <path d="M9 20h11"></path>
+            </svg>
+            <span>Silgi</span>
+          </button>
+
+          <button type="button" class="tool-btn" data-tool="line" aria-pressed="false" title="Çizgi (L)">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+              <path d="M5.5 18.5L18.5 5.5"></path>
+              <circle cx="5.5" cy="18.5" r="1.4"></circle>
+              <circle cx="18.5" cy="5.5" r="1.4"></circle>
+            </svg>
+            <span>Çizgi</span>
+          </button>
+
+          <button type="button" class="tool-btn" data-tool="rect" aria-pressed="false" title="Dikdörtgen (R)">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="4.5" y="5.5" width="15" height="13" rx="1.5"></rect>
+            </svg>
+            <span>Dikdörtgen</span>
+          </button>
+
+          <button type="button" class="tool-btn" data-tool="ellipse" aria-pressed="false" title="Elips (O)">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <ellipse cx="12" cy="12" rx="8" ry="6.5"></ellipse>
+            </svg>
+            <span>Elips</span>
+          </button>
+        </div>
+
+        <span class="toolbar-sep" aria-hidden="true"></span>
+
+        <button type="button" id="styleBtn" class="style-btn" aria-expanded="false" aria-controls="stylePanel" title="Renk ve kalınlık">
+          <span id="colorDot" class="color-dot" aria-hidden="true"></span>
+          <span class="style-copy">
+            <span class="style-label">Renk</span>
+            <span id="styleSummary" class="style-meta">Siyah · Orta</span>
+          </span>
+        </button>
+
+        <span class="toolbar-sep" aria-hidden="true"></span>
+
+        <div class="tool-group" role="group" aria-label="Geçmiş">
+          <button type="button" id="undoBtn" class="tool-btn" title="Geri al (U / Ctrl+Z)" disabled>
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9 14L4 9l5-5"></path>
+              <path d="M4 9h10a6 6 0 0 1 6 6v2"></path>
+            </svg>
+            <span>Geri</span>
+          </button>
+
+          <button type="button" id="redoBtn" class="tool-btn" title="Yinele (Ctrl+Y)" disabled>
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M15 14l5-5-5-5"></path>
+              <path d="M20 9H10a6 6 0 0 0-6 6v2"></path>
+            </svg>
+            <span>Yinele</span>
+          </button>
+        </div>
+
+        <span class="toolbar-sep" aria-hidden="true"></span>
+
+        <div class="tool-group" role="group" aria-label="Ekran işlemleri">
+          <button type="button" id="curtainBtn" class="tool-btn" aria-pressed="false" title="Perdele (Esc ile kapat)">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3.5" y="4.5" width="17" height="15" rx="2"></rect>
+              <rect x="7.5" y="8.5" width="9" height="7" rx="1.5" stroke-dasharray="2 2"></rect>
+            </svg>
+            <span>Perdele</span>
+          </button>
+
+          <button type="button" id="clearBtn" class="tool-btn is-danger" title="Tüm çizimleri sil">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 7h16"></path>
+              <path d="M9 7V5h6v2"></path>
+              <path d="M6.5 7l.8 12a2 2 0 0 0 2 1.8h5.4a2 2 0 0 0 2-1.8L17.5 7"></path>
+              <path d="M10 11v6M14 11v6"></path>
+            </svg>
+            <span>Tümünü sil</span>
+          </button>
+
+          <button type="button" id="exportBtn" class="tool-btn" title="PNG olarak kaydet">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 4v10"></path>
+              <path d="M8 10l4 4 4-4"></path>
+              <path d="M5 19h14"></path>
+            </svg>
+            <span>PNG</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="toolbar-end">
+        <div class="dock-group" role="group" aria-label="Araç çubuğu konumu">
+          <button type="button" id="dockLeft" class="icon-btn dock-btn" aria-label="Araç çubuğunu sola yerleştir" title="Sola yerleştir" aria-pressed="true">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 4v16"></path>
+              <path d="M9 12h10M15 8l-4 4 4 4"></path>
+            </svg>
+          </button>
+          <button type="button" id="dockRight" class="icon-btn dock-btn" aria-label="Araç çubuğunu sağa yerleştir" title="Sağa yerleştir" aria-pressed="false">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M20 4v16"></path>
+              <path d="M15 12H5m4-4-4 4 4 4"></path>
+            </svg>
+          </button>
+        </div>
+
+        <button type="button" id="collapseBtn" class="icon-btn collapse-btn" aria-expanded="true" aria-controls="toolbarMain" aria-label="Araç çubuğunu daralt" title="Daralt">
+          <svg class="icon collapse-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M8 14l4-4 4 4"></path>
+            <path d="M8 9l4-4 4 4"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="stage" class="stage">
+    <canvas id="drawCanvas" class="draw-canvas" aria-label="Çizim yüzeyi"></canvas>
+    <canvas id="previewCanvas" class="preview-canvas" aria-hidden="true"></canvas>
+
+    <div id="curtain" class="curtain" hidden>
+      <div id="curtainTop" class="curtain-panel" aria-hidden="true"></div>
+      <div id="curtainBottom" class="curtain-panel" aria-hidden="true"></div>
+      <div id="curtainLeft" class="curtain-panel" aria-hidden="true"></div>
+      <div id="curtainRight" class="curtain-panel" aria-hidden="true"></div>
+
+      <div id="curtainWindow" class="curtain-window" tabindex="0" role="group" aria-label="Perde penceresi. Taşımak için yön tuşlarını, boyutlandırmak için Shift ile yön tuşlarını kullanın.">
+        <span class="curtain-hint">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+            <path d="M8 6h.01M12 6h.01M16 6h.01M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01"></path>
+          </svg>
+          Sürükle
+        </span>
+        <span id="curtainResize" class="curtain-resize" aria-hidden="true"></span>
+      </div>
+    </div>
+  </main>
+
+  <div id="brushCursor" class="brush-cursor" aria-hidden="true" hidden></div>
+
+  <section id="stylePanel" class="style-panel" role="dialog" aria-modal="false" aria-labelledby="stylePanelTitle" tabindex="-1" hidden>
+    <div class="panel-head">
+      <div>
+        <h2 id="stylePanelTitle">Renk ve kalınlık</h2>
+        <p class="panel-note">24 renk · 3 kalem kalınlığı</p>
+      </div>
+      <button type="button" id="styleClose" class="icon-btn" aria-label="Stil panelini kapat">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18"></path>
+        </svg>
+      </button>
+    </div>
+
+    <div id="paletteGrid" class="swatch-grid" role="group" aria-label="Kalem renkleri"></div>
+
+    <div class="option-block">
+      <span class="option-label" id="penWidthLabel">Kalem kalınlığı</span>
+      <div id="penWidthGroup" class="seg" role="group" aria-labelledby="penWidthLabel">
+        <button type="button" data-pen-width="2" aria-pressed="false"><span class="width-dot width-dot-thin"></span>İnce</button>
+        <button type="button" data-pen-width="4" aria-pressed="true"><span class="width-dot width-dot-medium"></span>Orta</button>
+        <button type="button" data-pen-width="8" aria-pressed="false"><span class="width-dot width-dot-thick"></span>Kalın</button>
+      </div>
+    </div>
+
+    <div class="option-block">
+      <span class="option-label" id="eraserSizeLabel">Silgi boyu</span>
+      <div id="eraserGroup" class="seg" role="group" aria-labelledby="eraserSizeLabel">
+        <button type="button" data-eraser-size="24" aria-pressed="true"><span class="width-dot width-dot-medium"></span>Küçük</button>
+        <button type="button" data-eraser-size="48" aria-pressed="false"><span class="width-dot width-dot-thick"></span>Büyük</button>
+      </div>
+    </div>
+  </section>
+
+  <div id="toastRegion" class="toast-region" role="status" aria-live="polite" aria-atomic="false"></div>
+
+  <dialog id="clearDialog" class="modal" aria-labelledby="clearTitle" aria-describedby="clearDesc">
+    <div class="modal-body">
+      <div class="modal-icon" aria-hidden="true">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 7h16"></path>
+          <path d="M9 7V5h6v2"></path>
+          <path d="M6.5 7l.8 12a2 2 0 0 0 2 1.8h5.4a2 2 0 0 0 2-1.8L17.5 7"></path>
+          <path d="M10 11v6M14 11v6"></path>
+        </svg>
+      </div>
+      <h2 id="clearTitle">Tüm çizimler silinsin mi?</h2>
+      <p id="clearDesc">Ekrandaki bütün çizimler temizlenecek. Bu işlem geri alınabilir.</p>
+      <div class="modal-actions">
+        <button type="button" id="clearCancel" class="btn btn-secondary">Vazgeç</button>
+        <button type="button" id="clearConfirm" class="btn btn-danger">Tümünü sil</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>

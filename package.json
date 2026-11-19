@@ -1,0 +1,42 @@
+{
+  "name": "fatih-kalem-overlay",
+  "version": "1.0.0",
+  "description": "Windows için şeffaf, her zaman üstte kalan akıllı tahta çizim aracı.",
+  "main": "main.js",
+  "author": "Fatih Kalem Clone",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win portable"
+  },
+  "devDependencies": {
+    "electron": "^45.4.1",
+    "electron-builder": "^26.18.0"
+  },
+  "build": {
+    "appId": "com.fatihkalem.overlay",
+    "productName": "Fatih Kalem",
+    "asar": true,
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "Fatih-Kalem-${version}-portable.${ext}"
+    }
+  }
+}
